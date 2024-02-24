@@ -9,6 +9,20 @@
 #include <string.h>
 #include <unistd.h> 
 
+// Structure to store RGB values of a pixel
+typedef struct {
+    unsigned char red;
+    unsigned char green;
+    unsigned char blue;
+} Pixel;
+
+// Structure to store image data
+typedef struct {
+    int width;
+    int height;
+    Pixel **pixels;  // 2D array to store pixel data
+} Image;
+
 // Function to check if a file exists
 int fileExists(const char *filename) {
     FILE *file;
@@ -26,6 +40,34 @@ int args_length(char *args){
         args = strtok(NULL, ",");
     }
     return result;
+}
+
+// Function to load PPM image from file
+Image *load_ppm(const char *filename) {
+    FILE *file = fopen(filename, "rb");
+
+    int width, height, max_val;
+    fscanf(file, "%d %d %d", &width, &height, &max_val);
+    fgetc(file);  // consume newline
+
+    // Allocate memory for image
+    Image *image = (Image *)malloc(sizeof(Image));
+    image->width = width;
+    image->height = height;
+    image->pixels = (Pixel **)malloc(height * sizeof(Pixel *));
+    for (int i = 0; i < height; i++) {
+        image->pixels[i] = (Pixel *)malloc(width * sizeof(Pixel));
+    }
+
+    // Read pixel data
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            fscanf(file, "%hhu %hhu %hhu", &image->pixels[i][j].red, &image->pixels[i][j].green, &image->pixels[i][j].blue);
+        }
+    }
+
+    fclose(file);
+    return image;
 }
 
 int main(int argc, char **argv) {
@@ -149,6 +191,15 @@ int main(int argc, char **argv) {
         return R_ARGUMENT_INVALID;
     }
     // fclose(font_test);
+
+    Image *image=NULL;
+    if(strstr(input_file, ".ppm")!=NULL){
+        image=load_ppm(input_file);
+    }
+    //remove later
+    if (image) {
+        printf("Image loaded successfully. Dimensions: %d x %d\n", image->width, image->height);
+    }
 
     // If all checks pass, return 0 indicating success
     return 0;
