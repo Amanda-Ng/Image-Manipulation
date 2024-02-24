@@ -143,12 +143,12 @@ int main(int argc, char **argv) {
         fprintf(stderr, "P Argument Invalid\n");
         return P_ARGUMENT_INVALID;
     }
-    FILE *font_test = fopen(r_args+1, "r");
-    if(args_length(r_args)<5 || args_length(r_args)>5 || font_test==NULL){
+    // FILE *font_test = fopen(r_args+1, "r");
+    if(args_length(r_args)<5 || args_length(r_args)>5){
         fprintf(stderr, "R Argument Invalid\n");
         return R_ARGUMENT_INVALID;
     }
-    fclose(font_test);
+    // fclose(font_test);
 
     // If all checks pass, return 0 indicating success
     return 0;
