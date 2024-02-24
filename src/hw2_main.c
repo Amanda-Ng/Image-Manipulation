@@ -28,7 +28,12 @@ int main(int argc, char **argv) {
     // Define variables to store command-line arguments
     char *input_file = NULL;
     char *output_file = NULL;
-    // char *path_to_font = NULL;
+    char *c_args = NULL;
+    // char *p_args = NULL;
+    char *r_args = NULL;
+    char *path_to_font = NULL;
+    int i_argument_count = 0;
+    int o_argument_count = 0;
     int c_argument_count = 0;
     int p_argument_count = 0;
     int r_argument_count = 0;
@@ -38,19 +43,25 @@ int main(int argc, char **argv) {
     while ((opt = getopt(argc, argv, "i:o:c:p:r:")) != -1) {
         switch (opt) {
             case 'i':
+                i_argument_count++;
                 input_file = optarg;
                 break;
             case 'o':
+                o_argument_count++;
                 output_file = optarg;
                 break;
             case 'c':
                 c_argument_count++;
+                c_args = strtok(optarg, ",");
                 break;
             case 'p':
                 p_argument_count++;
+                // p_args = strtok(optarg, ",");
                 break;
             case 'r':
                 r_argument_count++;
+                r_args = strtok(optarg, ",");
+                path_to_font = (r_args + 1);
                 break;
             default:
                 // If an unrecognized argument is provided, print error and exit
@@ -66,7 +77,7 @@ int main(int argc, char **argv) {
     }
 
     // Check for duplicate arguments
-    if (c_argument_count > 1 || p_argument_count > 1 || r_argument_count > 1) {
+    if (i_argument_count > 1 || o_argument_count > 1 || c_argument_count > 1 || p_argument_count > 1 || r_argument_count > 1) {
         fprintf(stderr, "Duplicate argument\n");
         return DUPLICATE_ARGUMENT;
     }
@@ -87,7 +98,7 @@ int main(int argc, char **argv) {
     }
     fclose(output_test);
 
-    if(p_argument_count >= 1 && c_argument_count==0){
+    if(p_argument_count >= 1 && c_args==NULL){
         fprintf(stderr, "C Argument Missing\n");
         return C_ARGUMENT_MISSING;
     }
@@ -100,12 +111,12 @@ int main(int argc, char **argv) {
         fprintf(stderr, "P Argument Invalid\n");
         return P_ARGUMENT_INVALID;
     }
-    // FILE *test_output = fopen(input_file, "r");
-    if(r_argument_count<5 || r_argument_count>5){
+    FILE *font_test = fopen(path_to_font, "r");
+    if(r_argument_count<5 || r_argument_count>5 || font_test==NULL){
         fprintf(stderr, "R Argument Invalid\n");
         return R_ARGUMENT_INVALID;
     }
-    // fclose(test_output);
+    fclose(font_test);
 
     // If all checks pass, return 0 indicating success
     return 0;
