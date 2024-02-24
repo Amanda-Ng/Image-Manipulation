@@ -32,6 +32,10 @@ int main(int argc, char **argv) {
     // char *p_args = NULL;
     char *r_args = NULL;
     char *path_to_font = NULL;
+    // int c_row = 0;
+    // int c_col = 0;
+    // int c_width = 0;
+    // int c_height = 0;
     int i_argument_count = 0;
     int o_argument_count = 0;
     int c_argument_count = 0;
@@ -44,24 +48,47 @@ int main(int argc, char **argv) {
         switch (opt) {
             case 'i':
                 i_argument_count++;
-                input_file = optarg;
+                if(optarg[0]=='-'){
+                    fprintf(stderr, "Missing argument\n");
+                    return MISSING_ARGUMENT;
+                }else{
+                    input_file = optarg;
+                }
                 break;
             case 'o':
                 o_argument_count++;
-                output_file = optarg;
+                if(optarg[0]=='-'){
+                    fprintf(stderr, "Missing argument\n");
+                    return MISSING_ARGUMENT;
+                }else{
+                    output_file = optarg;
+                }
                 break;
             case 'c':
                 c_argument_count++;
-                c_args = strtok(optarg, ",");
+                if(optarg[0]=='-'){
+                    fprintf(stderr, "Missing argument\n");
+                    return MISSING_ARGUMENT;
+                }
+                // c_args = strtok(optarg, ",");
                 break;
             case 'p':
                 p_argument_count++;
+                if(optarg[0]=='-'){
+                    fprintf(stderr, "Missing argument\n");
+                    return MISSING_ARGUMENT;
+                }
                 // p_args = strtok(optarg, ",");
                 break;
             case 'r':
                 r_argument_count++;
-                r_args = strtok(optarg, ",");
-                path_to_font = (r_args + 1);
+                if(optarg[0]=='-'){
+                    fprintf(stderr, "Missing argument\n");
+                    return MISSING_ARGUMENT;
+                }else{
+                    r_args = strtok(optarg, ",");
+                    path_to_font = (r_args + 1);
+                }
                 break;
             default:
                 // If an unrecognized argument is provided, print error and exit
