@@ -105,6 +105,42 @@ Image *load_sbu(const char *filename) {
     fclose(file);
     return image;
 }
+// Function to save PPM image to file
+void save_ppm(const char *filename, Image *image) {
+    FILE *file = fopen(filename, "wb");
+
+    // Write header
+    fprintf(file, "P3\n%d %d\n255\n", image->width, image->height);
+
+    // Write pixel data
+    for (int i = 0; i < image->height; i++) {
+        for (int j = 0; j < image->width; j++) {
+            fprintf(file, "%hhu %hhu %hhu ", image->pixels[i][j].red, image->pixels[i][j].green, image->pixels[i][j].blue);
+        }
+        fprintf(file, "\n");
+    }
+
+    fclose(file);
+}
+
+// Function to save SBU image to file
+void save_sbu(const char *filename, Image *image) {
+    FILE *file = fopen(filename, "wb");
+
+    // Write header
+    fprintf(file, "SBU\n%d %d\n", image->width, image->height);
+
+    // Write color table
+    fprintf(file, "%d", 255); // Maximum value for a color component
+    for (int i = 0; i < image->height; i++) {
+        for (int j = 0; j < image->width; j++) {
+            fprintf(file, " %hhu %hhu %hhu", image->pixels[i][j].red, image->pixels[i][j].green, image->pixels[i][j].blue);
+        }
+    }
+    fprintf(file, "\n");
+
+    fclose(file);
+}
 
 int main(int argc, char **argv) {
     // (void)argc;
@@ -233,6 +269,11 @@ int main(int argc, char **argv) {
         image=load_ppm(input_file);
     }else if(strstr(input_file, ".sbu")!=NULL){
         image=load_sbu(input_file);
+    }
+    if(strstr(output_file, ".ppm")!=NULL){
+        save_ppm(output_file, image);
+    }else if(strstr(output_file, ".sbu")!=NULL){
+        save_sbu(output_file, image);
     }
     //remove later
     if (image) {
