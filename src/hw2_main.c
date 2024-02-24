@@ -231,6 +231,8 @@ int main(int argc, char **argv) {
     Image *image=NULL;
     if(strstr(input_file, ".ppm")!=NULL){
         image=load_ppm(input_file);
+    }else if(strstr(input_file, ".sbu")!=NULL){
+        image=load_sbu(input_file);
     }
     //remove later
     if (image) {
