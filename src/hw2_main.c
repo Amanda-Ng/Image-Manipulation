@@ -69,6 +69,42 @@ Image *load_ppm(const char *filename) {
     fclose(file);
     return image;
 }
+// Function to load SBU image from file
+Image *load_sbu(const char *filename) {
+    FILE *file = fopen(filename, "rb");    
+
+    int width, height, entries;
+    fscanf(file, "%d %d %d", &width, &height, &entries);
+    unsigned char colors[entries][3];
+
+    // Allocate memory for image
+    Image *image = (Image *)malloc(sizeof(Image));
+    image->width = width;
+    image->height = height;
+    image->pixels = (Pixel **)malloc(height * sizeof(Pixel *));
+    for (int i = 0; i < height; i++) {
+        image->pixels[i] = (Pixel *)malloc(width * sizeof(Pixel));
+    }
+
+    // Read color table
+    for(int i=0; i<entries; i++){
+        fscanf(file, "%hhu %hhu %hhu", &colors[i][0], &colors[i][1], &colors[i][2]);
+    }
+
+    // Read pixel data
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            int index=0;
+            fscanf(file, "%d", &index);
+            image->pixels[i][j].red=colors[index][0];
+            image->pixels[i][j].green=colors[index][1];
+            image->pixels[i][j].blue=colors[index][2];
+        }
+    }
+
+    fclose(file);
+    return image;
+}
 
 int main(int argc, char **argv) {
     // (void)argc;
