@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
     char *c_args = NULL;
     char *p_args = NULL;
     char *r_args = NULL;
-    char *path_to_font = NULL;
+    // char *path_to_font = NULL;
     int i_argument_count = 0;
     int o_argument_count = 0;
     int c_argument_count = 0;
@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
                     return MISSING_ARGUMENT;
                 }else{
                     r_args = strtok(optarg, ",");
-                    path_to_font = (r_args + 1);
+                    // path_to_font = (r_args + 1);
                 }
                 break;
             default:
@@ -143,7 +143,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "P Argument Invalid\n");
         return P_ARGUMENT_INVALID;
     }
-    FILE *font_test = fopen(path_to_font, "r");
+    FILE *font_test = fopen(r_args+1, "r");
     if(args_length(r_args)<5 || args_length(r_args)>5 || font_test==NULL){
         fprintf(stderr, "R Argument Invalid\n");
         return R_ARGUMENT_INVALID;
