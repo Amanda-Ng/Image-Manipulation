@@ -28,6 +28,7 @@ int main(int argc, char **argv) {
     // Define variables to store command-line arguments
     char *input_file = NULL;
     char *output_file = NULL;
+    // char *path_to_font = NULL;
     int c_argument_count = 0;
     int p_argument_count = 0;
     int r_argument_count = 0;
@@ -71,20 +72,40 @@ int main(int argc, char **argv) {
     }
 
     // Check if input file exists
-    if (!fileExists(input_file)) {
+    FILE *test_output = fopen(input_file, "r");
+    if (!fileExists(input_file) || test_output==NULL) {
         fprintf(stderr, "Input file missing\n");
         return INPUT_FILE_MISSING;
     }
+    fclose(test_output);
 
     // Check if output file is writable
-    FILE *test_output = fopen(output_file, "w");
-    if (test_output == NULL) {
+    FILE *output_test = fopen(output_file, "w");
+    if (output_test == NULL) {
         fprintf(stderr, "Output file unwritable\n");
         return OUTPUT_FILE_UNWRITABLE;
     }
-    fclose(test_output);
+    fclose(output_test);
 
-    // Additional checks for -c, -p, -r arguments can be implemented here
+    if(p_argument_count >= 1 && c_argument_count==0){
+        fprintf(stderr, "C Argument Missing\n");
+        return C_ARGUMENT_MISSING;
+    }
+
+    if(c_argument_count<4 || c_argument_count>4){
+        fprintf(stderr, "C Argument Invalid\n");
+        return C_ARGUMENT_INVALID;
+    }
+    if(p_argument_count<2 || p_argument_count>2){
+        fprintf(stderr, "P Argument Invalid\n");
+        return P_ARGUMENT_INVALID;
+    }
+    // FILE *test_output = fopen(input_file, "r");
+    if(r_argument_count<5 || r_argument_count>5){
+        fprintf(stderr, "R Argument Invalid\n");
+        return R_ARGUMENT_INVALID;
+    }
+    // fclose(test_output);
 
     // If all checks pass, return 0 indicating success
     return 0;
