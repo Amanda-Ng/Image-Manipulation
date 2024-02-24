@@ -19,6 +19,15 @@ int fileExists(const char *filename) {
     return 0;
 }
 
+int args_length(char *args){
+    int result =0;
+    while (args != NULL) {
+        result++;
+        args = strtok(NULL, ",");
+    }
+    return result;
+}
+
 int main(int argc, char **argv) {
     // (void)argc;
     // (void)argv;
@@ -29,13 +38,9 @@ int main(int argc, char **argv) {
     char *input_file = NULL;
     char *output_file = NULL;
     char *c_args = NULL;
-    // char *p_args = NULL;
+    char *p_args = NULL;
     char *r_args = NULL;
     char *path_to_font = NULL;
-    // int c_row = 0;
-    // int c_col = 0;
-    // int c_width = 0;
-    // int c_height = 0;
     int i_argument_count = 0;
     int o_argument_count = 0;
     int c_argument_count = 0;
@@ -70,7 +75,7 @@ int main(int argc, char **argv) {
                     fprintf(stderr, "Missing argument\n");
                     return MISSING_ARGUMENT;
                 }
-                // c_args = strtok(optarg, ",");
+                c_args = strtok(optarg, ",");
                 break;
             case 'p':
                 p_argument_count++;
@@ -78,7 +83,7 @@ int main(int argc, char **argv) {
                     fprintf(stderr, "Missing argument\n");
                     return MISSING_ARGUMENT;
                 }
-                // p_args = strtok(optarg, ",");
+                p_args = strtok(optarg, ",");
                 break;
             case 'r':
                 r_argument_count++;
@@ -130,16 +135,16 @@ int main(int argc, char **argv) {
         return C_ARGUMENT_MISSING;
     }
 
-    if(c_argument_count<4 || c_argument_count>4){
+    if(args_length(c_args)<4 || args_length(c_args)>4){
         fprintf(stderr, "C Argument Invalid\n");
         return C_ARGUMENT_INVALID;
     }
-    if(p_argument_count<2 || p_argument_count>2){
+    if(args_length(p_args)<2 || args_length(p_args)>2){
         fprintf(stderr, "P Argument Invalid\n");
         return P_ARGUMENT_INVALID;
     }
     FILE *font_test = fopen(path_to_font, "r");
-    if(r_argument_count<5 || r_argument_count>5 || font_test==NULL){
+    if(args_length(r_args)<5 || args_length(r_args)>5 || font_test==NULL){
         fprintf(stderr, "R Argument Invalid\n");
         return R_ARGUMENT_INVALID;
     }
