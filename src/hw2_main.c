@@ -182,7 +182,6 @@ Image *copy_region(Image *source, int start_row, int start_col, int width, int h
 
 // Function to paste a copied region into the target image
 void paste_region(Image *target, Image *copied_region, int dest_row, int dest_col) {
-    // Check if the copied region fits within the target image
 
     // Paste the copied region into the target image
     for (int i = 0; i < copied_region->height; i++) {
