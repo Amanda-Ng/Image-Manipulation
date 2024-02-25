@@ -131,10 +131,22 @@ void save_sbu(const char *filename, Image *image) {
     fprintf(file, "SBU\n%d %d\n", image->width, image->height);
 
     // Write color table
+    // fprintf(file, "%d", sizeof(entries)/sizeof(entries[0]));
+    // for(int l=0;l<sizeof(entries)/sizeof(entries[0]); l++){
+    //     fprintf(file, " %u", entries[l][0]);
+    //     fprintf(file, " %u", entries[l][1]);
+    //     fprintf(file, " %u", entries[l][2]);
+    // }
+    // fprintf(file, "\n");
     fprintf(file, "%d", 255); // Maximum value for a color component
     for (int i = 0; i < image->height; i++) {
         for (int j = 0; j < image->width; j++) {
-            fprintf(file, " %hhu %hhu %hhu", image->pixels[i][j].red, image->pixels[i][j].green, image->pixels[i][j].blue);
+            // int index=-1;
+            // for(int k=0;k<sizeof(entries)/sizeof(entries[0]);k++){
+            //     if(image->pixels[i][j].red==entries[k][0] && image->pixels[i][j].green==entries[k][1] && image->pixels[i][j].blue==entries[k][2]){
+            //         fprintf(file, " %d", k);
+            //     }
+            // }
         }
     }
     fprintf(file, "\n");
