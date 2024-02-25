@@ -154,6 +154,46 @@ void save_sbu(const char *filename, Image *image) {
     fclose(file);
 }
 
+// Function to copy a region of pixels from the source image
+Image *copy_region(Image *source, int start_row, int start_col, int width, int height) {
+
+    // Allocate memory for the copied region
+    Image *copied_region = (Image *)malloc(sizeof(Image));
+
+    copied_region->width = width;
+    copied_region->height = height;
+    copied_region->pixels = (Pixel **)malloc(height * sizeof(Pixel *));
+
+    for (int i = 0; i < height; i++) {
+        copied_region->pixels[i] = (Pixel *)malloc(width * sizeof(Pixel));
+    }
+
+    // Copy pixel data from source image to copied region
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            if(start_row + height <= source->height && start_col + width <= source->width){
+                copied_region->pixels[i][j] = source->pixels[start_row + i][start_col + j];
+            }
+        }
+    }
+
+    return copied_region;
+}
+
+// Function to paste a copied region into the target image
+void paste_region(Image *target, Image *copied_region, int dest_row, int dest_col) {
+    // Check if the copied region fits within the target image
+
+    // Paste the copied region into the target image
+    for (int i = 0; i < copied_region->height; i++) {
+        for (int j = 0; j < copied_region->width; j++) {
+            if(dest_row + copied_region->height <= target->height && dest_col + copied_region->width <= target->width){
+                target->pixels[dest_row + i][dest_col + j] = copied_region->pixels[i][j];
+            }
+        }
+    }
+}
+
 int main(int argc, char **argv) {
     // (void)argc;
     // (void)argv;
@@ -282,6 +322,10 @@ int main(int argc, char **argv) {
     }else if(strstr(input_file, ".sbu")!=NULL){
         image=load_sbu(input_file);
     }
+
+    Image *copied_region = copy_region(image, (int)*c_args, (int)*(c_args+1), *(c_args+2), *(c_args+3));
+    paste_region(image, copied_region, (int)*p_args, (int)*(p_args+1));
+
     if(strstr(output_file, ".ppm")!=NULL){
         save_ppm(output_file, image);
     }else if(strstr(output_file, ".sbu")!=NULL){
