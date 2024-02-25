@@ -171,7 +171,7 @@ Image *copy_region(Image *source, int start_row, int start_col, int width, int h
     // Copy pixel data from source image to copied region
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            if(start_row + height <= source->height && start_col + width <= source->width){
+            if(start_row + i <= source->height && start_col + j <= source->width){
                 copied_region->pixels[i][j] = source->pixels[start_row + i][start_col + j];
             }
         }
@@ -187,7 +187,7 @@ void paste_region(Image *target, Image *copied_region, int dest_row, int dest_co
     // Paste the copied region into the target image
     for (int i = 0; i < copied_region->height; i++) {
         for (int j = 0; j < copied_region->width; j++) {
-            if(dest_row + copied_region->height <= target->height && dest_col + copied_region->width <= target->width){
+            if(dest_row + i <= target->height && dest_col + j <= target->width){
                 target->pixels[dest_row + i][dest_col + j] = copied_region->pixels[i][j];
             }
         }
