@@ -41,9 +41,17 @@ int args_length(char *args){
     // }
     // return result;
 
+    // int count=1;
+    // for (int i=0; args[i]; i++){
+    //     count += (args[i] == ',');
+    // }
+    // return count;
+
     int count=1;
     for (int i=0; args[i]; i++){
-        count += (args[i] == ',');
+        if(args[i] == ',' && args[i+1]!='\0')
+        // count += (args[i] == ',');
+        count += 1;
     }
     return count;
 
@@ -333,25 +341,25 @@ int main(int argc, char **argv) {
     }
     fclose(font_test);
 
-    Image *image=NULL;
-    if(strstr(input_file, ".ppm")!=NULL){
-        image=load_ppm(input_file);
-    }else if(strstr(input_file, ".sbu")!=NULL){
-        image=load_sbu(input_file);
-    }
+    // Image *image=NULL;
+    // if(strstr(input_file, ".ppm")!=NULL){
+    //     image=load_ppm(input_file);
+    // }else if(strstr(input_file, ".sbu")!=NULL){
+    //     image=load_sbu(input_file);
+    // }
 
-    Image *copied_region = copy_region(image, (int)*c_args, (int)*(c_args+1), *(c_args+2), *(c_args+3));
-    paste_region(image, copied_region, (int)*p_args, (int)*(p_args+1));
+    // Image *copied_region = copy_region(image, (int)*c_args, (int)*(c_args+1), *(c_args+2), *(c_args+3));
+    // paste_region(image, copied_region, (int)*p_args, (int)*(p_args+1));
 
-    if(strstr(output_file, ".ppm")!=NULL){
-        save_ppm(output_file, image);
-    }else if(strstr(output_file, ".sbu")!=NULL){
-        save_sbu(output_file, image);
-    }
-    //remove later
-    if (image) {
-        printf("Image loaded successfully. Dimensions: %d x %d\n", image->width, image->height);
-    }
+    // if(strstr(output_file, ".ppm")!=NULL){
+    //     save_ppm(output_file, image);
+    // }else if(strstr(output_file, ".sbu")!=NULL){
+    //     save_sbu(output_file, image);
+    // }
+    // //remove later
+    // if (image) {
+    //     printf("Image loaded successfully. Dimensions: %d x %d\n", image->width, image->height);
+    // }
 
     // If all checks pass, return 0 indicating success
     return 0;
