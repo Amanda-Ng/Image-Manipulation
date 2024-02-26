@@ -214,6 +214,10 @@ int main(int argc, char **argv) {
     // Process command-line arguments using getopt
     int opt;
     while ((opt = getopt(argc, argv, "i:o:c:p:r:")) != -1) {
+        if(optind==argc){
+            fprintf(stderr, "Missing argument\n");
+            return MISSING_ARGUMENT; 
+        }
         switch (opt) {
             case 'i':
                 i_argument_count++;
