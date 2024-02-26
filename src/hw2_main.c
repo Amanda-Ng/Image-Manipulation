@@ -307,12 +307,12 @@ int main(int argc, char **argv) {
         fprintf(stderr, "P Argument Invalid\n");
         return P_ARGUMENT_INVALID;
     }
-    // FILE *font_test = fopen(r_args+1, "r");
+    FILE *font_test = fopen((r_args+1), "r");
     if(args_length(r_args)<5 || args_length(r_args)>5){
         fprintf(stderr, "R Argument Invalid\n");
         return R_ARGUMENT_INVALID;
     }
-    // fclose(font_test);
+    fclose(font_test);
 
     Image *image=NULL;
     if(strstr(input_file, ".ppm")!=NULL){
