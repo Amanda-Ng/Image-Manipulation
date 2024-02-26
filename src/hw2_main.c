@@ -213,7 +213,7 @@ int main(int argc, char **argv) {
 
     // Process command-line arguments using getopt
     int opt;
-    while ((opt = getopt(argc, argv, "i:o:c:p:r:")) != -1) {
+    while ((opt = getopt(argc, argv, ":i:o:c:p:r:")) != -1) {
         switch (opt) {
             case 'i':
                 i_argument_count++;
@@ -259,10 +259,18 @@ int main(int argc, char **argv) {
                     // path_to_font = (r_args + 1);
                 }
                 break;
+
+            case '?':
+                    fprintf(stderr, "Unrecognized argument\n");
+                    return UNRECOGNIZED_ARGUMENT;
             default:
-                // If an unrecognized argument is provided, print error and exit
-                fprintf(stderr, "Unrecognized argument\n");
-                return UNRECOGNIZED_ARGUMENT;
+                    fprintf(stderr, "Missing argument\n");
+                    return MISSING_ARGUMENT;
+
+            // default:
+            //     // If an unrecognized argument is provided, print error and exit
+            //     fprintf(stderr, "Unrecognized argument\n");
+            //     return UNRECOGNIZED_ARGUMENT;
         }
     }
 
