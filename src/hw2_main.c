@@ -34,12 +34,19 @@ int fileExists(const char *filename) {
 }
 
 int args_length(char *args){
-    int result =0;
-    while (args != NULL) {
-        result++;
-        args = strtok(NULL, ",");
+    // int result =0;
+    // while (args != NULL) {
+    //     result++;
+    //     args = strtok(NULL, ",");
+    // }
+    // return result;
+
+    int count=1;
+    for (int i=0; args[i]; i++){
+        count += (args[i] == ',');
     }
-    return result;
+    return count;
+
 }
 
 // Function to load PPM image from file
@@ -204,6 +211,7 @@ int main(int argc, char **argv) {
     char *c_args = NULL;
     char *p_args = NULL;
     char *r_args = NULL;
+    char *r_arguments=NULL;
     // char *path_to_font = NULL;
     int i_argument_count = 0;
     int o_argument_count = 0;
@@ -239,7 +247,8 @@ int main(int argc, char **argv) {
                     fprintf(stderr, "Missing argument\n");
                     return MISSING_ARGUMENT;
                 }
-                c_args = strtok(optarg, ",");
+                c_args=optarg;
+                // c_args = strtok(optarg, ",");
                 break;
             case 'p':
                 p_argument_count++;
@@ -247,7 +256,8 @@ int main(int argc, char **argv) {
                     fprintf(stderr, "Missing argument\n");
                     return MISSING_ARGUMENT;
                 }
-                p_args = strtok(optarg, ",");
+                p_args=optarg;
+                // p_args = strtok(optarg, ",");
                 break;
             case 'r':
                 r_argument_count++;
@@ -255,7 +265,8 @@ int main(int argc, char **argv) {
                     fprintf(stderr, "Missing argument\n");
                     return MISSING_ARGUMENT;
                 }else{
-                    r_args = strtok(optarg, ",");
+                    r_args=optarg;
+                    r_arguments = strtok(optarg, ",");
                     // path_to_font = (r_args + 1);
                 }
                 break;
@@ -315,7 +326,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "P Argument Invalid\n");
         return P_ARGUMENT_INVALID;
     }
-    FILE *font_test = fopen((r_args+1), "r");
+    FILE *font_test = fopen((r_arguments+1), "r");
     if(args_length(r_args)<5 || args_length(r_args)>5){
         fprintf(stderr, "R Argument Invalid\n");
         return R_ARGUMENT_INVALID;
