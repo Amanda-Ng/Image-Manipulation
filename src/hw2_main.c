@@ -44,11 +44,10 @@ int args_length(char *args){
 
 // Function to load PPM image from file
 Image *load_ppm(const char *filename) {
-    FILE *file = fopen(filename, "rb");
+    FILE *file = fopen(filename, "r");
 
     int width, height, max_val;
     fscanf(file, "%d %d %d", &width, &height, &max_val);
-    fgetc(file);  // consume newline
 
     // Allocate memory for image
     Image *image = (Image *)malloc(sizeof(Image));
@@ -71,7 +70,7 @@ Image *load_ppm(const char *filename) {
 }
 // Function to load SBU image from file
 Image *load_sbu(const char *filename) {
-    FILE *file = fopen(filename, "rb");    
+    FILE *file = fopen(filename, "r");    
 
     int width, height, entries;
     fscanf(file, "%d %d %d", &width, &height, &entries);
@@ -107,7 +106,7 @@ Image *load_sbu(const char *filename) {
 }
 // Function to save PPM image to file
 void save_ppm(const char *filename, Image *image) {
-    FILE *file = fopen(filename, "wb");
+    FILE *file = fopen(filename, "w");
 
     // Write header
     fprintf(file, "P3\n%d %d\n255\n", image->width, image->height);
@@ -125,7 +124,7 @@ void save_ppm(const char *filename, Image *image) {
 
 // Function to save SBU image to file
 void save_sbu(const char *filename, Image *image) {
-    FILE *file = fopen(filename, "wb");
+    FILE *file = fopen(filename, "w");
 
     // Write header
     fprintf(file, "SBU\n%d %d\n", image->width, image->height);
