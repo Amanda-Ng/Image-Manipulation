@@ -34,19 +34,6 @@ int fileExists(const char *filename) {
 }
 
 int args_length(char *args){
-    // int result =0;
-    // while (args != NULL) {
-    //     result++;
-    //     args = strtok(NULL, ",");
-    // }
-    // return result;
-
-    // int count=1;
-    // for (int i=0; args[i]; i++){
-    //     count += (args[i] == ',');
-    // }
-    // return count;
-
     int count=1;
     for (int i=0; args[i]; i++){
         if(args[i] == ',' && args[i+1]!='\0')
@@ -54,7 +41,6 @@ int args_length(char *args){
         count += 1;
     }
     return count;
-
 }
 
 // Function to load PPM image from file
@@ -285,11 +271,6 @@ int main(int argc, char **argv) {
             default:
                     fprintf(stderr, "Missing argument\n");
                     return MISSING_ARGUMENT;
-
-            // default:
-            //     // If an unrecognized argument is provided, print error and exit
-            //     fprintf(stderr, "Unrecognized argument\n");
-            //     return UNRECOGNIZED_ARGUMENT;
         }
     }
 
@@ -340,6 +321,9 @@ int main(int argc, char **argv) {
         return R_ARGUMENT_INVALID;
     }
     fclose(font_test);
+    
+    // If all checks pass, return 0 indicating success
+    return 0;
 
     // Image *image=NULL;
     // if(strstr(input_file, ".ppm")!=NULL){
@@ -360,7 +344,4 @@ int main(int argc, char **argv) {
     // if (image) {
     //     printf("Image loaded successfully. Dimensions: %d x %d\n", image->width, image->height);
     // }
-
-    // If all checks pass, return 0 indicating success
-    return 0;
 }
