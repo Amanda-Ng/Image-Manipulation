@@ -48,7 +48,7 @@ Image *load_ppm(const char *filename) {
     FILE *file = fopen(filename, "r");
 
     int width, height, max_val;
-    fscanf(file, "%*s %*d %d %d %d", &width, &height, &max_val);
+    fscanf(file, "%*2s %*d %d %d %d", &width, &height, &max_val);
 
     // Allocate memory for image
     Image *image = (Image *)malloc(sizeof(Image));
@@ -74,7 +74,7 @@ Image *load_sbu(const char *filename) {
     FILE *file = fopen(filename, "r");    
 
     int width, height, entries;
-    fscanf(file, "%*s %d %d %d", &width, &height, &entries);
+    fscanf(file, "%*2s %d %d %d", &width, &height, &entries);
     unsigned char colors[entries][3];
 
     // Allocate memory for image
