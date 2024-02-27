@@ -145,31 +145,79 @@ void save_ppm(const char *filename, Image *image) {
 // Function to save SBU image to file
 void save_sbu(const char *filename, Image *image) {
     FILE *file = fopen(filename, "w");
-
-    // Write header
-    fprintf(file, "SBU\n%d %d\n", image->width, image->height);
-
-    // Write color table
-    // fprintf(file, "%d", sizeof(entries)/sizeof(entries[0]));
-    // for(int l=0;l<sizeof(entries)/sizeof(entries[0]); l++){
-    //     fprintf(file, " %u", entries[l][0]);
-    //     fprintf(file, " %u", entries[l][1]);
-    //     fprintf(file, " %u", entries[l][2]);
-    // }
-    // fprintf(file, "\n");
-    fprintf(file, "%d", 255); // Maximum value for a color component
+    // Write SBU header
+    fprintf(file, "SBU\n");
+    fprintf(file, "%d %d\n", image->width, image->height);
+    // Color table generation
+    int color_table_size = 0;
+    Pixel color_table[image->width * image->height];
     for (int i = 0; i < image->height; i++) {
         for (int j = 0; j < image->width; j++) {
-            // int index=-1;
-            // for(int k=0;k<sizeof(entries)/sizeof(entries[0]);k++){
-            //     if(image->pixels[i][j].red==entries[k][0] && image->pixels[i][j].green==entries[k][1] && image->pixels[i][j].blue==entries[k][2]){
-            //         fprintf(file, " %d", k);
-            //     }
-            // }
+            // Check if the current pixel color exists in the color table
+            int k;
+            for (k = 0; k < color_table_size; k++) {
+                if (color_table[k].red == image->pixels[i][j].red &&
+                    color_table[k].green == image->pixels[i][j].green &&
+                    color_table[k].blue == image->pixels[i][j].blue) {
+                    break;
+                }
+            }
+            // If the color is not found in the color table, add it
+            if (k == color_table_size) {
+                color_table[color_table_size] = image->pixels[i][j];
+                color_table_size++;
+            }
         }
     }
+    // Write color table size and entries
+    fprintf(file, "%d\n", color_table_size);
+    for (int i = 0; i < color_table_size; i++) {
+        fprintf(file, "%hhu %hhu %hhu ", color_table[i].red, color_table[i].green, color_table[i].blue);
+    }
     fprintf(file, "\n");
-
+    // Pixel data
+    int run_length = 1;
+    Pixel prev_pixel = image->pixels[0][0];
+    for (int i = 0; i < image->height; i++) {
+        for (int j = 0; j < image->width; j++) {
+            Pixel current_pixel = image->pixels[i][j];
+            if (current_pixel.red == prev_pixel.red &&
+                current_pixel.green == prev_pixel.green &&
+                current_pixel.blue == prev_pixel.blue && ((i!=0) && (j!=0))) {
+                // Same color as previous pixel, increase run length
+                run_length++;
+            } else {
+                // Different color, write run-length encoded pixel data
+                if (run_length > 1) {
+                    fprintf(file, "*%d ", run_length);
+                    run_length = 1;
+                }
+                // Write index of the current pixel in the color table
+                for (int k = 0; k < color_table_size; k++) {
+                    if (current_pixel.red == color_table[k].red &&
+                        current_pixel.green == color_table[k].green &&
+                        current_pixel.blue == color_table[k].blue) {
+                        fprintf(file, "%d ", k);
+                        break;
+                    }
+                }
+                prev_pixel = current_pixel;
+            }
+        }
+    }
+    // Write any remaining run-length encoded pixels
+    if (run_length > 1) {
+        fprintf(file, "*%d ", run_length);
+        Pixel current_pixel = image->pixels[(image->height)-1][(image->width)-1];
+            for (int k = 0; k < color_table_size; k++) {
+                if (current_pixel.red == color_table[k].red &&
+                    current_pixel.green == color_table[k].green &&
+                    current_pixel.blue == color_table[k].blue) {
+                        fprintf(file, "%d ", k);
+                        break;
+                    }
+                }
+    }
     fclose(file);
 }
 
@@ -353,13 +401,13 @@ int main(int argc, char **argv) {
         }
     }
 
-    // if(strstr(output_file, ".ppm")!=NULL){
-    //     save_ppm(output_file, image);
-    // }else if(strstr(output_file, ".sbu")!=NULL){
-    //     save_sbu(output_file, image);
-    // }
-    // //remove later
-    // if (image) {
-    //     printf("Image loaded successfully. Dimensions: %d x %d\n", image->width, image->height);
-    // }
+    if(strstr(output_file, ".ppm")!=NULL){
+        save_ppm(output_file, image);
+    }else if(strstr(output_file, ".sbu")!=NULL){
+        save_sbu(output_file, image);
+    }
+    //remove later
+    if (image) {
+        printf("Image loaded successfully. Dimensions: %d x %d\n", image->width, image->height);
+    }
 }
