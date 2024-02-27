@@ -337,15 +337,21 @@ int main(int argc, char **argv) {
     
     return 0;
 
-    // Image *image=NULL;
-    // if(strstr(input_file, ".ppm")!=NULL){
-    //     image=load_ppm(input_file);
-    // }else if(strstr(input_file, ".sbu")!=NULL){
-    //     image=load_sbu(input_file);
-    // }
+    Image *image=NULL;
+    if(strstr(input_file, ".ppm")!=NULL){
+        image=load_ppm(input_file);
+    }else if(strstr(input_file, ".sbu")!=NULL){
+        image=load_sbu(input_file);
+    }
 
-    // Image *copied_region = copy_region(image, (int)*c_args, (int)*(c_args+1), *(c_args+2), *(c_args+3));
-    // paste_region(image, copied_region, (int)*p_args, (int)*(p_args+1));
+    if(c_args){
+        c_args = strtok(optarg, ",");
+        Image *copied_region = copy_region(image, (int)*c_args, (int)*(c_args+1), *(c_args+2), *(c_args+3));
+        if(p_args){
+            p_args = strtok(optarg, ",");
+            paste_region(image, copied_region, (int)*p_args, (int)*(p_args+1));
+        }
+    }
 
     // if(strstr(output_file, ".ppm")!=NULL){
     //     save_ppm(output_file, image);
