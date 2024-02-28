@@ -518,8 +518,6 @@ int main(int argc, char **argv)
         // fclose(font_test);
     }
 
-    return 0;
-
     Image *image = NULL;
     if (strstr(input_file, ".ppm") != NULL)
     {
@@ -564,5 +562,6 @@ int main(int argc, char **argv)
     (void)r_args;
     (void)p_args;
     (void)c_args;
-
+    
+    return 0;
 }
