@@ -309,6 +309,66 @@ void paste_region(Image *target, Image *copied_region, int dest_row, int dest_co
     }
 }
 
+// Load font from file
+char **load_font(const char *filename, int *font_height) {
+    FILE *file = fopen(filename, "r");
+
+    int lines_allocated = 10;
+    int max_line_len = 150;
+    char **lines = (char **)malloc(sizeof(char *) * lines_allocated);
+
+    int num_lines = 0;
+    while (fgets(lines[num_lines], max_line_len, file) != NULL) {
+        num_lines++;
+    }
+
+    fclose(file);
+    *font_height = num_lines;
+    return lines;
+}
+
+// TODO: account for scaling (assumed 6), number of columns per char, extra column
+void print_message(Image *image, const char *message, const char *font_filename, int font_size, int row, int col) {
+    int font_height;
+    char **font = load_font(font_filename, &font_height);
+
+    int message_length = strlen(message);
+    int current_col = col;
+
+    int scaled_font_height = font_height * font_size;
+
+    for (int i = 0; i < message_length; i++) {
+        char current_char = message[i];
+
+        if (current_char >= 'a' && current_char <= 'z') {
+            current_char -= 32; // Convert to uppercase
+        }
+
+        if (current_char == ' ') {
+            current_col += 5; 
+            continue;
+        }
+
+        if (current_col + 6 * font_size > image->width || row + scaled_font_height > image->height) {
+            break; // Message runs off the image
+        }
+
+        for (int j = 0; j < font_height; j++) {
+            for (int k = 0; k < 6; k++) {
+                if (font[current_char - 'A'][j] == '*') {
+                    // White pixel
+                    image->pixels[row + j * font_size][current_col + k * font_size].red = 255;
+                    image->pixels[row + j * font_size][current_col + k * font_size].green = 255;
+                    image->pixels[row + j * font_size][current_col + k * font_size].blue = 255;
+                }
+            }
+        }
+
+        current_col += ((6 * font_size) + 1); // Advance 6 columns and leave 1 column space
+    }
+}
+
+
 int main(int argc, char **argv)
 {
     // (void)argc;
@@ -472,13 +532,19 @@ int main(int argc, char **argv)
 
     if (c_args)
     {
-        c_args = strtok(optarg, ",");
-        Image *copied_region = copy_region(image, (int)*c_args, (int)*(c_args + 1), *(c_args + 2), *(c_args + 3));
+        c_args = strtok(c_args, ",");
+        Image *copied_region = copy_region(image, (int)*c_args, (int)*(c_args + 1), (int)*(c_args + 2), (int)*(c_args + 3));
         if (p_args)
         {
-            p_args = strtok(optarg, ",");
+            p_args = strtok(p_args, ",");
             paste_region(image, copied_region, (int)*p_args, (int)*(p_args + 1));
         }
+    }
+
+    if(r_args){
+        r_args = strtok(r_args, ",");
+        print_message(image, r_args, r_args+1, (int)*(r_args+2), (int)*(r_args+3), (int)*(r_args+4));
+
     }
 
     if (strstr(output_file, ".ppm") != NULL)
