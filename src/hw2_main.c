@@ -55,7 +55,7 @@ Image *load_ppm(const char *filename)
     FILE *file = fopen(filename, "r");
 
     int width, height, max_val;
-    fscanf(file, "%*2s %*d %d %d %d", &width, &height, &max_val);
+    fscanf(file, "%*s %d %d %d", &width, &height, &max_val);
 
     // Allocate memory for image
     Image *image = (Image *)malloc(sizeof(Image));
@@ -85,7 +85,7 @@ Image *load_sbu(const char *filename)
     FILE *file = fopen(filename, "r");
 
     int width, height, entries;
-    fscanf(file, "%*2s %d %d %d", &width, &height, &entries);
+    fscanf(file, "%*s %d %d %d", &width, &height, &entries);
     unsigned char colors[entries][3];
 
     // Allocate memory for image
@@ -112,7 +112,7 @@ Image *load_sbu(const char *filename)
         int count, index;
         fscanf(file, "%d", &index);
 
-        if (index <= 0)
+        if (index < 0)
         {
             // RLE encoding
             fscanf(file, "%d", &count);
@@ -192,13 +192,17 @@ void save_sbu(const char *filename, Image *image)
             // If the color is not found in the color table, add it
             if (k == color_table_size)
             {
+                // if(k<10){
+                // printf("red: %d", image->pixels[i][j].red);
+                // printf("green: %d", image->pixels[i][j].green);
+                // printf("blue: %d", image->pixels[i][j].blue);}
                 color_table[color_table_size] = image->pixels[i][j];
                 color_table_size++;
             }
         }
     }
     // Write color table size and entries
-    fprintf(file, "%d\n", color_table_size);
+    fprintf(file, "%d ", color_table_size);
     for (int i = 0; i < color_table_size; i++)
     {
         fprintf(file, "%hhu %hhu %hhu ", color_table[i].red, color_table[i].green, color_table[i].blue);
@@ -366,6 +370,14 @@ void print_message(Image *image, const char *message, const char *font_filename,
 
         current_col += ((6 * font_size) + 1); // Advance 6 columns and leave 1 column space
     }
+}
+
+void free_image(Image *image){
+    for(int i=0; i<image->height; i++){
+        free(image->pixels[i]);
+    }
+    free(image->pixels);
+    free(image);
 }
 
 
@@ -563,5 +575,7 @@ int main(int argc, char **argv)
     (void)p_args;
     (void)c_args;
     
+    free_image(image);
+
     return 0;
 }
