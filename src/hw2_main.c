@@ -103,6 +103,12 @@ Image *load_sbu(const char *filename)
     {
         fscanf(file, "%hhu %hhu %hhu", &colors[i][0], &colors[i][1], &colors[i][2]);
     }
+    
+    // for(int i=0; i<entries; i++){
+    //     printf("red: %d", colors[i][0]);
+    //     printf("green: %d", colors[i][1]);
+    //     printf("blue: %d", colors[i][2]);
+    // }
 
     // Read pixel data with run-length encoding
     int pixelIndex = 0;
@@ -110,13 +116,15 @@ Image *load_sbu(const char *filename)
     while (y < height)
     {
         int count, index;
-        fscanf(file, "%d", &index);
-
-        if (index < 0)
+        char next_char;
+        int matched_items = fscanf(file, "%c%d", &next_char, &index);
+        if(matched_items == 2){
+        if (next_char != ' ' && next_char != '\n')
         {
+            // printf("%c%d\n", next_char, index);
             // RLE encoding
-            fscanf(file, "%d", &count);
-            fscanf(file, "%d", &index);
+            count = index;
+            fscanf(file, "%c%d", &next_char, &index);
         }
         else
         {
@@ -138,6 +146,7 @@ Image *load_sbu(const char *filename)
                 y++;
             }
         }
+    }
     }
 
     fclose(file);
