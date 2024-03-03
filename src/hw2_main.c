@@ -348,19 +348,22 @@ Image *copy_region(Image *source, int start_row, int start_col, int width, int h
     // Allocate memory for the copied region
     Image *copied_region = (Image *)malloc(sizeof(Image));
 
-    copied_region->width = width;
-    copied_region->height = height;
-    copied_region->pixels = (Pixel **)malloc(height * sizeof(Pixel *));
+    int actual_width = (start_col + width <= source->width) ? width : source->width - start_col;
+    int actual_height = (start_row + height <= source->height) ? height : source->height - start_row;
 
-    for (int i = 0; i < height; i++)
+    copied_region->width = actual_width;
+    copied_region->height = actual_height;
+    copied_region->pixels = (Pixel **)malloc(actual_height * sizeof(Pixel *));
+
+    for (int i = 0; i < actual_height; i++)
     {
-        copied_region->pixels[i] = (Pixel *)malloc(width * sizeof(Pixel));
+        copied_region->pixels[i] = (Pixel *)malloc(actual_width * sizeof(Pixel));
     }
 
     // Copy pixel data from source image to copied region
-    for (int i = 0; i < height; i++)
+    for (int i = 0; i < actual_height; i++)
     {
-        for (int j = 0; j < width; j++)
+        for (int j = 0; j < actual_width; j++)
         {
             if (start_row + i < source->height && start_col + j < source->width)
             {
