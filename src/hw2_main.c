@@ -103,7 +103,7 @@ Image *load_sbu(const char *filename)
     {
         fscanf(file, "%hhu %hhu %hhu", &colors[i][0], &colors[i][1], &colors[i][2]);
     }
-    
+
     // for(int i=0; i<entries; i++){
     //     printf("red: %d", colors[i][0]);
     //     printf("green: %d", colors[i][1]);
@@ -118,35 +118,36 @@ Image *load_sbu(const char *filename)
         int count, index;
         char next_char;
         int matched_items = fscanf(file, "%c%d", &next_char, &index);
-        if(matched_items == 2){
-        if (next_char != ' ' && next_char != '\n')
+        if (matched_items == 2)
         {
-            // printf("%c%d\n", next_char, index);
-            // RLE encoding
-            count = index;
-            fscanf(file, "%c%d", &next_char, &index);
-        }
-        else
-        {
-            // Single pixel
-            count = 1;
-        }
-
-        for (int i = 0; i < count; i++)
-        {
-            image->pixels[y][x].red = colors[index][0];
-            image->pixels[y][x].green = colors[index][1];
-            image->pixels[y][x].blue = colors[index][2];
-
-            pixelIndex++;
-            x++;
-            if (x == width)
+            if (next_char != ' ' && next_char != '\n')
             {
-                x = 0;
-                y++;
+                // printf("%c%d\n", next_char, index);
+                // RLE encoding
+                count = index;
+                fscanf(file, "%c%d", &next_char, &index);
+            }
+            else
+            {
+                // Single pixel
+                count = 1;
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                image->pixels[y][x].red = colors[index][0];
+                image->pixels[y][x].green = colors[index][1];
+                image->pixels[y][x].blue = colors[index][2];
+
+                pixelIndex++;
+                x++;
+                if (x == width)
+                {
+                    x = 0;
+                    y++;
+                }
             }
         }
-    }
     }
 
     fclose(file);
@@ -226,46 +227,53 @@ void save_sbu(const char *filename, Image *image)
         {
             Pixel current_pixel = image->pixels[i][j];
             Pixel next_pixel;
-            //initialize next_pixel
-            if(j==(image->width -1) && i==(image->height -1)){
-                //last pixel
-                if(current_pixel.red == prev_pixel.red &&
-                current_pixel.green == prev_pixel.green &&
-                current_pixel.blue == prev_pixel.blue){
-                    //last pixel in run length
+            // initialize next_pixel
+            if (j == (image->width - 1) && i == (image->height - 1))
+            {
+                // last pixel
+                if (current_pixel.red == prev_pixel.red &&
+                    current_pixel.green == prev_pixel.green &&
+                    current_pixel.blue == prev_pixel.blue)
+                {
+                    // last pixel in run length
                     run_length++;
                     fprintf(file, "*%d ", run_length);
                 }
-                    for (int k = 0; k < color_table_size; k++)
+                for (int k = 0; k < color_table_size; k++)
+                {
+                    if (current_pixel.red == color_table[k].red &&
+                        current_pixel.green == color_table[k].green &&
+                        current_pixel.blue == color_table[k].blue)
                     {
-                        if (current_pixel.red == color_table[k].red &&
-                            current_pixel.green == color_table[k].green &&
-                            current_pixel.blue == color_table[k].blue)
-                        {
-                            fprintf(file, "%d ", k);
-                            break;
-                        }
+                        fprintf(file, "%d ", k);
+                        break;
                     }
-            }else if(j==(image->width -1)){
-                next_pixel = image->pixels[i+1][0];
+                }
             }
-            else{
-                next_pixel = image->pixels[i][j+1];
+            else if (j == (image->width - 1))
+            {
+                next_pixel = image->pixels[i + 1][0];
+            }
+            else
+            {
+                next_pixel = image->pixels[i][j + 1];
             }
 
             if ((current_pixel.red == prev_pixel.red &&
-                current_pixel.green == prev_pixel.green &&
-                current_pixel.blue == prev_pixel.blue) && !((i == 0) && (j == 0)))
+                 current_pixel.green == prev_pixel.green &&
+                 current_pixel.blue == prev_pixel.blue) &&
+                !((i == 0) && (j == 0)))
             {
                 // printf("run length increased");
                 // Same color as previous pixel, increase run length
                 run_length++;
                 if ((current_pixel.red != next_pixel.red ||
-                current_pixel.green != next_pixel.green ||
-                current_pixel.blue != next_pixel.blue) && run_length > 1)
+                     current_pixel.green != next_pixel.green ||
+                     current_pixel.blue != next_pixel.blue) &&
+                    run_length > 1)
                 {
-                    //end of run length
-                    // printf("end of run length");
+                    // end of run length
+                    //  printf("end of run length");
                     fprintf(file, "*%d ", run_length);
                     run_length = 1;
                     for (int k = 0; k < color_table_size; k++)
@@ -280,24 +288,25 @@ void save_sbu(const char *filename, Image *image)
                     }
                 }
             }
-            else if(current_pixel.red == next_pixel.red &&
-                current_pixel.green == next_pixel.green &&
-                current_pixel.blue == next_pixel.blue){
-                    //start of run length
-                    run_length=1;
-                }
+            else if (current_pixel.red == next_pixel.red &&
+                     current_pixel.green == next_pixel.green &&
+                     current_pixel.blue == next_pixel.blue)
+            {
+                // start of run length
+                run_length = 1;
+            }
             else
             {
-                //different from previous and next pixel
-                // Different color, write run-length encoded pixel data
-                // if ((current_pixel.red != next_pixel.red ||
-                // current_pixel.green != next_pixel.green ||
-                // current_pixel.blue != next_pixel.blue) && run_length > 1)
-                // {
-                //     fprintf(file, "*%d ", run_length);
-                //     run_length = 1;
-                // }
-                // Write index of the current pixel in the color table
+                // different from previous and next pixel
+                //  Different color, write run-length encoded pixel data
+                //  if ((current_pixel.red != next_pixel.red ||
+                //  current_pixel.green != next_pixel.green ||
+                //  current_pixel.blue != next_pixel.blue) && run_length > 1)
+                //  {
+                //      fprintf(file, "*%d ", run_length);
+                //      run_length = 1;
+                //  }
+                //  Write index of the current pixel in the color table
                 for (int k = 0; k < color_table_size; k++)
                 {
                     if (current_pixel.red == color_table[k].red &&
@@ -381,7 +390,8 @@ void paste_region(Image *target, Image *copied_region, int dest_row, int dest_co
 }
 
 // Load font from file
-char **load_font(const char *filename, int *font_height) {
+char **load_font(const char *filename, int *font_height)
+{
     FILE *file = fopen(filename, "r");
 
     int lines_allocated = 10;
@@ -389,7 +399,8 @@ char **load_font(const char *filename, int *font_height) {
     char **lines = (char **)malloc(sizeof(char *) * lines_allocated);
 
     int num_lines = 0;
-    while (fgets(lines[num_lines], max_line_len, file) != NULL) {
+    while (fgets(lines[num_lines], max_line_len, file) != NULL)
+    {
         num_lines++;
     }
 
@@ -399,7 +410,8 @@ char **load_font(const char *filename, int *font_height) {
 }
 
 // TODO: account for scaling (assumed 6), number of columns per char, extra column
-void print_message(Image *image, const char *message, const char *font_filename, int font_size, int row, int col) {
+void print_message(Image *image, const char *message, const char *font_filename, int font_size, int row, int col)
+{
     int font_height;
     char **font = load_font(font_filename, &font_height);
 
@@ -408,25 +420,32 @@ void print_message(Image *image, const char *message, const char *font_filename,
 
     int scaled_font_height = font_height * font_size;
 
-    for (int i = 0; i < message_length; i++) {
+    for (int i = 0; i < message_length; i++)
+    {
         char current_char = message[i];
 
-        if (current_char >= 'a' && current_char <= 'z') {
+        if (current_char >= 'a' && current_char <= 'z')
+        {
             current_char -= 32; // Convert to uppercase
         }
 
-        if (current_char == ' ') {
-            current_col += 5; 
+        if (current_char == ' ')
+        {
+            current_col += 5;
             continue;
         }
 
-        if (current_col + 6 * font_size > image->width || row + scaled_font_height > image->height) {
+        if (current_col + 6 * font_size > image->width || row + scaled_font_height > image->height)
+        {
             break; // Message runs off the image
         }
 
-        for (int j = 0; j < font_height; j++) {
-            for (int k = 0; k < 6; k++) {
-                if (font[current_char - 'A'][j] == '*') {
+        for (int j = 0; j < font_height; j++)
+        {
+            for (int k = 0; k < 6; k++)
+            {
+                if (font[current_char - 'A'][j] == '*')
+                {
                     // White pixel
                     image->pixels[row + j * font_size][current_col + k * font_size].red = 255;
                     image->pixels[row + j * font_size][current_col + k * font_size].green = 255;
@@ -439,14 +458,15 @@ void print_message(Image *image, const char *message, const char *font_filename,
     }
 }
 
-void free_image(Image *image){
-    for(int i=0; i<image->height; i++){
+void free_image(Image *image)
+{
+    for (int i = 0; i < image->height; i++)
+    {
         free(image->pixels[i]);
     }
     free(image->pixels);
     free(image);
 }
-
 
 int main(int argc, char **argv)
 {
@@ -574,12 +594,12 @@ int main(int argc, char **argv)
         return C_ARGUMENT_MISSING;
     }
 
-    if ((c_argument_count==1) &&(args_length(c_args) < 4 || args_length(c_args) > 4))
+    if ((c_argument_count == 1) && (args_length(c_args) < 4 || args_length(c_args) > 4))
     {
         fprintf(stderr, "C Argument Invalid\n");
         return C_ARGUMENT_INVALID;
     }
-    if ((p_argument_count==1) && (args_length(p_args) < 2 || args_length(p_args) > 2))
+    if ((p_argument_count == 1) && (args_length(p_args) < 2 || args_length(p_args) > 2))
     {
         fprintf(stderr, "P Argument Invalid\n");
         return P_ARGUMENT_INVALID;
@@ -609,20 +629,56 @@ int main(int argc, char **argv)
 
     if (c_args)
     {
-        c_args = strtok(c_args, ",");
-        Image *copied_region = copy_region(image, (int)*c_args, (int)*(c_args + 1), (int)*(c_args + 2), (int)*(c_args + 3));
+        const char *token;
+        int c_arguments[5];
+        int i = 0;
+        token = strtok(c_args, ",");
+        while (token != NULL)
+        {
+            c_arguments[i] = atoi(token);
+            i++;
+            token = strtok(NULL, ",");
+        }
+        //           for(int j=0; j<5;j++){
+        //       printf("%d\n", c_arguments[j]);
+        //   }
+
+
+        // const char *c_arguments = strtok(c_args, ",");
+        Image *copied_region = copy_region(image, c_arguments[0], c_arguments[1], c_arguments[2], c_arguments[3]);
+        // (void)c_arguments;
+        // (void)copied_region;
         if (p_args)
         {
-            p_args = strtok(p_args, ",");
-            paste_region(image, copied_region, (int)*p_args, (int)*(p_args + 1));
+            const char *token1;
+            int p_arguments[2];
+            int k = 0;
+            token1 = strtok(p_args, ",");
+            while (token1 != NULL)
+            {
+                p_arguments[k] = atoi(token1);
+                k++;
+                token1 = strtok(NULL, ",");
+            }
+            paste_region(image, copied_region, p_arguments[0], p_arguments[1]);
+            // for (int j = 0; j < 2; j++)
+            // {
+            //     printf("%d\n", p_arguments[k]);
+            // }
+            // printf("%d\n", p_arguments[1]);
+
+            // (void)p_arguments;
+
+            // const char *p_arguments = strtok(p_args, ",");
+            // paste_region(image, copied_region, atoi(p_arguments + 2), atoi(p_arguments + 3));
         }
     }
 
-    if(r_args){
-        r_args = strtok(r_args, ",");
-        print_message(image, r_args, r_args+1, (int)*(r_args+2), (int)*(r_args+3), (int)*(r_args+4));
+    // if(r_args){
+    //     r_args = strtok(r_args, ",");
+    //     print_message(image, r_args, r_args+1, (int)*(r_args+2), (int)*(r_args+3), (int)*(r_args+4));
 
-    }
+    // }
 
     if (strstr(output_file, ".ppm") != NULL)
     {
@@ -641,7 +697,7 @@ int main(int argc, char **argv)
     (void)r_args;
     (void)p_args;
     (void)c_args;
-    
+
     free_image(image);
 
     return 0;
