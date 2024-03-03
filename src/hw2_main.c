@@ -225,21 +225,78 @@ void save_sbu(const char *filename, Image *image)
         for (int j = 0; j < image->width; j++)
         {
             Pixel current_pixel = image->pixels[i][j];
-            if (current_pixel.red == prev_pixel.red &&
+            Pixel next_pixel;
+            //initialize next_pixel
+            if(j==(image->width -1) && i==(image->height -1)){
+                //last pixel
+                if(current_pixel.red == prev_pixel.red &&
                 current_pixel.green == prev_pixel.green &&
-                current_pixel.blue == prev_pixel.blue && ((i != 0) && (j != 0)))
+                current_pixel.blue == prev_pixel.blue){
+                    //last pixel in run length
+                    run_length++;
+                    fprintf(file, "*%d ", run_length);
+                }
+                    for (int k = 0; k < color_table_size; k++)
+                    {
+                        if (current_pixel.red == color_table[k].red &&
+                            current_pixel.green == color_table[k].green &&
+                            current_pixel.blue == color_table[k].blue)
+                        {
+                            fprintf(file, "%d ", k);
+                            break;
+                        }
+                    }
+            }else if(j==(image->width -1)){
+                next_pixel = image->pixels[i+1][0];
+            }
+            else{
+                next_pixel = image->pixels[i][j+1];
+            }
+
+            if ((current_pixel.red == prev_pixel.red &&
+                current_pixel.green == prev_pixel.green &&
+                current_pixel.blue == prev_pixel.blue) && !((i == 0) && (j == 0)))
             {
+                // printf("run length increased");
                 // Same color as previous pixel, increase run length
                 run_length++;
-            }
-            else
-            {
-                // Different color, write run-length encoded pixel data
-                if (run_length > 1)
+                if ((current_pixel.red != next_pixel.red ||
+                current_pixel.green != next_pixel.green ||
+                current_pixel.blue != next_pixel.blue) && run_length > 1)
                 {
+                    //end of run length
+                    // printf("end of run length");
                     fprintf(file, "*%d ", run_length);
                     run_length = 1;
+                    for (int k = 0; k < color_table_size; k++)
+                    {
+                        if (current_pixel.red == color_table[k].red &&
+                            current_pixel.green == color_table[k].green &&
+                            current_pixel.blue == color_table[k].blue)
+                        {
+                            fprintf(file, "%d ", k);
+                            break;
+                        }
+                    }
                 }
+            }
+            else if(current_pixel.red == next_pixel.red &&
+                current_pixel.green == next_pixel.green &&
+                current_pixel.blue == next_pixel.blue){
+                    //start of run length
+                    run_length=1;
+                }
+            else
+            {
+                //different from previous and next pixel
+                // Different color, write run-length encoded pixel data
+                // if ((current_pixel.red != next_pixel.red ||
+                // current_pixel.green != next_pixel.green ||
+                // current_pixel.blue != next_pixel.blue) && run_length > 1)
+                // {
+                //     fprintf(file, "*%d ", run_length);
+                //     run_length = 1;
+                // }
                 // Write index of the current pixel in the color table
                 for (int k = 0; k < color_table_size; k++)
                 {
@@ -251,26 +308,27 @@ void save_sbu(const char *filename, Image *image)
                         break;
                     }
                 }
-                prev_pixel = current_pixel;
+                // prev_pixel = current_pixel;
             }
+            prev_pixel = current_pixel;
         }
     }
     // Write any remaining run-length encoded pixels
-    if (run_length > 1)
-    {
-        fprintf(file, "*%d ", run_length);
-        Pixel current_pixel = image->pixels[(image->height) - 1][(image->width) - 1];
-        for (int k = 0; k < color_table_size; k++)
-        {
-            if (current_pixel.red == color_table[k].red &&
-                current_pixel.green == color_table[k].green &&
-                current_pixel.blue == color_table[k].blue)
-            {
-                fprintf(file, "%d ", k);
-                break;
-            }
-        }
-    }
+    // if (run_length > 1)
+    // {
+    //     fprintf(file, "*%d ", run_length);
+    //     Pixel current_pixel = image->pixels[(image->height) - 1][(image->width) - 1];
+    //     for (int k = 0; k < color_table_size; k++)
+    //     {
+    //         if (current_pixel.red == color_table[k].red &&
+    //             current_pixel.green == color_table[k].green &&
+    //             current_pixel.blue == color_table[k].blue)
+    //         {
+    //             fprintf(file, "%d ", k);
+    //             break;
+    //         }
+    //     }
+    // }
     fclose(file);
 }
 
