@@ -862,20 +862,20 @@ int main(int argc, char **argv)
         }
     }
 
-    if(r_args){
-        const char *token;
-        const char *r_arguments[5];
-        int i = 0;
-        token = strtok(r_args, ",");
-        while (token != NULL)
-        {
-            r_arguments[i] = token;
-            i++;
-            token = strtok(NULL, ",");
-        }
-        print_message(image, r_arguments[0], r_arguments[1], atoi(r_arguments[2]), atoi(r_arguments[3]), atoi(r_arguments[4]));
+    // if(r_args){
+    //     const char *token;
+    //     const char *r_arguments[5];
+    //     int i = 0;
+    //     token = strtok(r_args, ",");
+    //     while (token != NULL)
+    //     {
+    //         r_arguments[i] = token;
+    //         i++;
+    //         token = strtok(NULL, ",");
+    //     }
+    //     print_message(image, r_arguments[0], r_arguments[1], atoi(r_arguments[2]), atoi(r_arguments[3]), atoi(r_arguments[4]));
 
-    }
+    // }
 
     if (strstr(output_file, ".ppm") != NULL)
     {
