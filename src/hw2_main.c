@@ -525,6 +525,78 @@ Image **parse_font(const char *filename){
     return letter_images;
 }
 
+void free_image(Image *image)
+{
+    for (int i = 0; i < image->height; i++)
+    {
+        free(image->pixels[i]);
+    }
+    free(image->pixels);
+    free(image);
+}
+
+void print_message(Image *image, const char *message, const char *font_filename, int font_size, int row, int col){
+    //Allocate memory
+    Image **letter_images = parse_font(font_filename);
+    Image **message_letter_images = (Image**)malloc((int)strlen(message) * sizeof(Image*));
+    for(int i=0; i<(int)strlen(message); i++){
+        message_letter_images[i] = (Image *)malloc(sizeof(Image));
+        message_letter_images[i]->pixels = (Pixel **)malloc(letter_images[0]->height * font_size * sizeof(Pixel *));
+        for(int j=0;j<(letter_images[0]->height*font_size);j++){
+            message_letter_images[i]->pixels[j] = (Pixel *)malloc(letter_images[(toupper(message[i])-'A')]->width *font_size * sizeof(Pixel));
+        }
+    }
+
+    //Create scaled images
+    for(int m=0; m<(int)strlen(message);m++){
+        if(message[m]==' '){
+            continue;
+        }
+        for(int i=0;i<letter_images[(toupper(message[m])-'A')]->height;i++){
+            for(int j=0; j<letter_images[(toupper(message[m])-'A')]->width; j++){
+                Pixel original = letter_images[(toupper(message[m])-'A')]->pixels[i][j];
+                for(int k=0;k<font_size;k++){
+                    for(int l=0;l<font_size;l++){
+                        message_letter_images[m]->pixels[i*font_size + k][j*font_size+l] = original;
+                    }
+                }
+            }
+        }
+    }
+
+    //Paste images
+    int current_col = col;
+
+    for(int k=0;k<(int)strlen(message);k++){
+        if(message[k]==' '){
+            current_col += 5;
+            continue;
+        }
+        if (row + message_letter_images[k]->height < image->height && current_col + message_letter_images[k]->width < image->width){
+            for (int i = 0; i < message_letter_images[k]->height; i++)
+            {
+                for (int j = 0; j < message_letter_images[k]->width; j++)
+                {
+                    image->pixels[row + i][current_col + j] = message_letter_images[k]->pixels[i][j];
+                }
+            }
+            current_col += 1;
+        }
+        else{
+            break;
+        }
+    }
+
+    for(int k=0; k<26;k++){
+        free_image(letter_images[k]);
+    }
+    free(letter_images);
+    for(int l=0;l<(int)strlen(message);l++){
+        free_image(message_letter_images[l]);
+    }
+    free(message_letter_images);
+}
+
 // // TODO: account for scaling (assumed 6), number of columns per char, extra column
 // void print_message(Image *image, const char *message, const char *font_filename, int font_size, int row, int col)
 // {
@@ -574,15 +646,15 @@ Image **parse_font(const char *filename){
 //     }
 // }
 
-void free_image(Image *image)
-{
-    for (int i = 0; i < image->height; i++)
-    {
-        free(image->pixels[i]);
-    }
-    free(image->pixels);
-    free(image);
-}
+// void free_image(Image *image)
+// {
+//     for (int i = 0; i < image->height; i++)
+//     {
+//         free(image->pixels[i]);
+//     }
+//     free(image->pixels);
+//     free(image);
+// }
 
 int main(int argc, char **argv)
 {
@@ -596,7 +668,7 @@ int main(int argc, char **argv)
     char *c_args = NULL;
     char *p_args = NULL;
     char *r_args = NULL;
-    char *r_arguments = NULL;
+    // char *r_arguments = NULL;
     // char *path_to_font = NULL;
     int i_argument_count = 0;
     int o_argument_count = 0;
@@ -663,7 +735,7 @@ int main(int argc, char **argv)
             else
             {
                 r_args = optarg;
-                r_arguments = strtok(optarg, ",");
+                // r_arguments = strtok(optarg, ",");
                 // path_to_font = (r_args + 1);
             }
             break;
@@ -790,11 +862,20 @@ int main(int argc, char **argv)
         }
     }
 
-    // if(r_args){
-    //     r_args = strtok(r_args, ",");
-    //     print_message(image, r_args, r_args+1, (int)*(r_args+2), (int)*(r_args+3), (int)*(r_args+4));
+    if(r_args){
+        const char *token;
+        const char *r_arguments[5];
+        int i = 0;
+        token = strtok(r_args, ",");
+        while (token != NULL)
+        {
+            r_arguments[i] = token;
+            i++;
+            token = strtok(NULL, ",");
+        }
+        print_message(image, r_arguments[0], r_arguments[1], atoi(r_arguments[2]), atoi(r_arguments[3]), atoi(r_arguments[4]));
 
-    // }
+    }
 
     if (strstr(output_file, ".ppm") != NULL)
     {
@@ -809,7 +890,7 @@ int main(int argc, char **argv)
     {
         printf("Image loaded successfully. Dimensions: %d x %d\n", image->width, image->height);
     }
-    (void)r_arguments;
+    // (void)r_arguments;
     (void)r_args;
     (void)p_args;
     (void)c_args;
