@@ -392,74 +392,187 @@ void paste_region(Image *target, Image *copied_region, int dest_row, int dest_co
     }
 }
 
-// Load font from file
-char **load_font(const char *filename, int *font_height)
-{
-    FILE *file = fopen(filename, "r");
+// // Load font from file
+// char **load_font(const char *filename, int *font_height)
+// {
+//     FILE *file = fopen(filename, "r");
 
-    int lines_allocated = 10;
-    int max_line_len = 150;
-    char **lines = (char **)malloc(sizeof(char *) * lines_allocated);
+//     int lines_allocated = 10;
+//     int max_line_len = 150;
+//     char **lines = (char **)malloc(sizeof(char *) * lines_allocated);
 
-    int num_lines = 0;
-    while (fgets(lines[num_lines], max_line_len, file) != NULL)
-    {
-        num_lines++;
+//     int num_lines = 0;
+//     while (fgets(lines[num_lines], max_line_len, file) != NULL)
+//     {
+//         num_lines++;
+//     }
+
+//     fclose(file);
+//     *font_height = num_lines;
+//     return lines;
+// }
+
+Image **parse_font(const char *filename){
+    //return an array of images where each image is a letter in the font
+    FILE* file = fopen(filename, "r");
+    int font_height = 1;
+    char c;
+    int current_col;
+    Image** letter_images = (Image**)malloc(26 * sizeof(Image*));
+
+    //Account for extra column
+    if(strcmp(filename,"font3.txt")){
+        current_col = 1;
+    }else{
+        current_col = 0;
     }
 
-    fclose(file);
-    *font_height = num_lines;
-    return lines;
-}
-
-// TODO: account for scaling (assumed 6), number of columns per char, extra column
-void print_message(Image *image, const char *message, const char *font_filename, int font_size, int row, int col)
-{
-    int font_height;
-    char **font = load_font(font_filename, &font_height);
-
-    int message_length = strlen(message);
-    int current_col = col;
-
-    int scaled_font_height = font_height * font_size;
-
-    for (int i = 0; i < message_length; i++)
-    {
-        char current_char = message[i];
-
-        if (current_char >= 'a' && current_char <= 'z')
-        {
-            current_char -= 32; // Convert to uppercase
+    // Count the number of lines
+    while ((c = fgetc(file)) != EOF) {
+        if (c == '\n') {
+            font_height++;
         }
+    }
+    
+    // Reset the file pointer to the beginning of the file
+    fseek(file, 0, SEEK_SET);
 
-        if (current_char == ' ')
-        {
-            current_col += 5;
-            continue;
+    //find width and allocate memory
+    for(int i=0; i<26; i++){
+        letter_images[i] = (Image *)malloc(sizeof(Image));
+        letter_images[i]->pixels = (Pixel **)malloc(font_height * sizeof(Pixel *));
+        int letter_width = 0;
+        for(int j=current_col; j<current_col+10; j++){
+            //find first empty space
+            char ch;
+            int spaces_found;
+            fseek(file, j, SEEK_SET); // Move to position j in first row
+            if ((ch = fgetc(file)) == ' '){
+                spaces_found = 1;
+            }else{
+                continue;
+            }
+
+            //Check for empty spaces in the same column
+            for(int k=1; k<font_height; k++){
+                //skip to next line at position j
+                while ((c = fgetc(file)) != EOF && c != '\n') {
+                }
+                fseek(file, j, SEEK_CUR);
+
+                //increment number of spaces if empty space found
+                if ((ch = fgetc(file)) == ' '){
+                    spaces_found++;
+                }
+            }
+            if(spaces_found == font_height){
+                letter_width = j-current_col;
+                for(int l=0; l<font_height; l++){
+                    letter_images[i]->pixels[l] = (Pixel *)malloc(letter_width * sizeof(Pixel));
+                }
+                letter_images[i]->height = font_height;
+                letter_images[i]->width = letter_width;
+                current_col = j+1;
+                if(strcmp(filename,"font2.txt") && i==17){
+                    //Account for extra column
+                    current_col++;
+                }
+                break;
+            }
         }
+    }
 
-        if (current_col + 6 * font_size > image->width || row + scaled_font_height > image->height)
-        {
-            break; // Message runs off the image
-        }
+    //Reset current_col
+    if(strcmp(filename,"font3.txt")){
+        current_col = 1;
+    }else{
+        current_col = 0;
+    }
 
-        for (int j = 0; j < font_height; j++)
-        {
-            for (int k = 0; k < 6; k++)
-            {
-                if (font[current_char - 'A'][j] == '*')
-                {
-                    // White pixel
-                    image->pixels[row + j * font_size][current_col + k * font_size].red = 255;
-                    image->pixels[row + j * font_size][current_col + k * font_size].green = 255;
-                    image->pixels[row + j * font_size][current_col + k * font_size].blue = 255;
+    //copy letter to image
+    for(int i=0; i<26; i++){
+
+        fseek(file, current_col, SEEK_SET); // Move to current_col in first row
+        char ch;
+
+        for(int j=0; j<font_height; j++){
+
+                //skip to next line
+                if(j>0){
+                    while ((ch = fgetc(file)) != EOF && ch != '\n') {
+                    }
+                    //skip to position current_col
+                    fseek(file, current_col, SEEK_CUR);
+                }
+
+            for(int k=0; k<letter_images[i]->width; k++){
+
+                if((ch = fgetc(file)) == '*'){
+                    letter_images[i]->pixels[j][k].red = 255;
+                    letter_images[i]->pixels[j][k].green = 255;
+                    letter_images[i]->pixels[j][k].blue = 255;
+                }else{
+                    letter_images[i]->pixels[j][k].red = 0;
+                    letter_images[i]->pixels[j][k].green = 0;
+                    letter_images[i]->pixels[j][k].blue = 0;
                 }
             }
         }
-
-        current_col += ((6 * font_size) + 1); // Advance 6 columns and leave 1 column space
+        current_col = (current_col + letter_images[i]->width + 1);
     }
+
+    fclose(file);
+    return letter_images;
 }
+
+// // TODO: account for scaling (assumed 6), number of columns per char, extra column
+// void print_message(Image *image, const char *message, const char *font_filename, int font_size, int row, int col)
+// {
+//     int font_height;
+//     char **font = load_font(font_filename, &font_height);
+
+//     int message_length = strlen(message);
+//     int current_col = col;
+
+//     int scaled_font_height = font_height * font_size;
+
+//     for (int i = 0; i < message_length; i++)
+//     {
+//         char current_char = message[i];
+
+//         if (current_char >= 'a' && current_char <= 'z')
+//         {
+//             current_char -= 32; // Convert to uppercase
+//         }
+
+//         if (current_char == ' ')
+//         {
+//             current_col += 5;
+//             continue;
+//         }
+
+//         if (current_col + 6 * font_size > image->width || row + scaled_font_height > image->height)
+//         {
+//             break; // Message runs off the image
+//         }
+
+//         for (int j = 0; j < font_height; j++)
+//         {
+//             for (int k = 0; k < 6; k++)
+//             {
+//                 if (font[current_char - 'A'][j] == '*')
+//                 {
+//                     // White pixel
+//                     image->pixels[row + j * font_size][current_col + k * font_size].red = 255;
+//                     image->pixels[row + j * font_size][current_col + k * font_size].green = 255;
+//                     image->pixels[row + j * font_size][current_col + k * font_size].blue = 255;
+//                 }
+//             }
+//         }
+
+//         current_col += ((6 * font_size) + 1); // Advance 6 columns and leave 1 column space
+//     }
+// }
 
 void free_image(Image *image)
 {
